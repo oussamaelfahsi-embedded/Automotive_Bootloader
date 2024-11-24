@@ -17,9 +17,7 @@
 #define COM_UART2                 0x02
 
 /* memory layout */
-#define BM_MSP  /*  Boot Manger  @MSP*/
-#define FBL_MSP /* Flash Bootloader @MSP*/
-#define APP_MSP /*Application @MSP */
+#define MSP_VALUE           /* Based on the each layer */
 
 #define BM_RESET_HANDLER /* Boot Manger @RESET_HANDLER */
 #define FBL_RESET_HANDLER /* Flash Bootloader @RESET_HANDLER*/

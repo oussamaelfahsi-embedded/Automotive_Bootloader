@@ -18,8 +18,9 @@
 #include "fbl_diag_core.h"
 #include "UDS_Shared.h"
 #include "fbl_diag_core.h"
+#include "ECU_Reset.h"
 
-uint8_t RxData[UDS_FrameLength] ;
+uint8_t *RxData ;
  
 
 /* Negative responses Codes NRC */
@@ -27,9 +28,7 @@ uint8_t RxData[UDS_FrameLength] ;
 #define IMLOIF  0x13 /* incorrect Message Length Or Invalid Format --------------------*/
 #define CNC     0x22 /* Conditions Not Correct ----------------------------------------*/
 
-#define Diag_Set_Next_Session()  \
-       {        \ 
-        RxData = UDS_GetRxFrame; }
+#define SessionCnrtl_ReadData()    { RxData = UDS_GetRxFrame; }
 
 #define Diag_SessControl_GetSID             RxData[0]
 #define Diag_SessControl_GetNextSession     RxData[1]
@@ -37,7 +36,7 @@ uint8_t RxData[UDS_FrameLength] ;
 
             
 /* Functions Prototype  -------------------- ------------------------------------------*/
-void Diag_DiagSessCntrl_MainFctMainFct( void );
+void DiagSessCntrl_MainFct( void );
 uint8_t DiagCheckSubFunctionCode(uint8_t);
 void SendDiagNegativeResponce(uint8_t);
 uint8_t SendDiagPositiveResponce(uint8_t);

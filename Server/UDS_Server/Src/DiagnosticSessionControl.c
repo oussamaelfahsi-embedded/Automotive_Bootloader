@@ -7,7 +7,7 @@
 void DiagSessCntrl_MainFct( void ){
 
     uint8_t Resp = CHECK_NOK; 
-    Diag_Set_Next_Session();
+    SessionCnrtl_ReadData();
     /* Verifing the Sub Fnct */
     if(  DiagCheckSubFunctionCode( Diag_SessControl_GetNextSession ) != CHECK_OK ){
         SendDiagNegativeResponce(SFNS);
@@ -53,67 +53,72 @@ uint8_t SendDiagPositiveResponce(  uint8_t Sub_Fct  ){
 
 
 uint8_t DiagSessionReInit(uint8_t __state){ 
-    uint32_t Msp_Set;
+    uint32_t MSP_Value;
+    uint8_t _check=CHECK_NOK;
     #if IS_FOR_APP
-    Msp_Set = *((volatile uint32_t*)APP_MSP);
+    MSP_Value = *((volatile uint32_t*)APP_MSP);
+    _check=DiagSetResetHandlerAddr(IS_FOR_APP );
     #elif IS_FOR_FBL 
-    Msp_Set = *((volatile uint32_t*)FBL_MSP);
+    MSP_Value = *((volatile uint32_t*)FBL_MSP);
+    _check=DiagSetResetHandlerAddr(IS_FOR_FBL );
     #endif 
-    __set_MSP(Msp_Set);
-    /* Disable Timer */
-    if(HAL_TIM_Base_Stop(&Timer) != HAL_OK){
-        return CHECK_NOK;
-    }
-    if(SendDiagPositiveResponce(__state) != CHECK_OK ){
-        return CHECK_NOK;
-    }
-    if(DiagSessionRunResetHandler( __state ) != CHECK_OK){
-        return CHECK_NOK;
+    DiagSetMSPValue(MSP_Value);
+    DiagSetStateSession(__state);
+    if(_check == CHECK_OK){
+        DiagSetResetReady();
+        if(DiagGetResetReady()){
+        DiagSetResetNone();
+        __SoftReset();
+        }
     }
     return CHECK_OK;
 }
+
 
 uint8_t DiagSessionSwitch(uint8_t __state ){
-    /* Set the New Session */
-    uint32_t Msp_Set;  
+    DiagSetResetInProgress();
+    uint8_t _check = CHECK_NOK ;
+    uint32_t MSP_Value;  
     #if IS_FOR_APP 
-    Msp_Set = *((volatile uint32_t*)BM_MSP);
+        MSP_Value = *((volatile uint32_t*)BM_MSP);
+        _check=DiagSetResetHandlerAddr(IS_FOR_BM );
     #elif IS_FOR_FBL
-    Msp_Set = *((volatile uint32_t*)FBL_MSP);
+        MSP_Value = *((volatile uint32_t*)FBL_MSP);
+        _check=DiagSetResetHandlerAddr(IS_FOR_FBL );
     #endif 
-    __set_MSP(Msp_Set);
-    /* Stop Timer       */ 
-    if(HAL_TIM_Base_Stop(&Timer) != HAL_OK){
-        return CHECK_NOK;
-    }
+    /* Set the MSP VALUE */
+    DiagSetMSPValue(MSP_Value);
+
     /* Set the FLAG in the new session control */
     DiagSetStateSession(__state);
-    if(SendDiagPositiveResponce(__state) != CHECK_OK ){
-        return CHECK_NOK;
+    if(_check == CHECK_OK){
+        DiagSetResetReady();
+        if(DiagGetResetReady()){
+        DiagSetResetNone();
+        __SoftReset();
+        }
     }
-    if(DiagSessionRunResetHandler( __state ) != CHECK_OK){
-        return CHECK_NOK;
-    }
-    return CHECK_OK;
+    return _check;
 }
 
-uint8_t  DiagSessionRunResetHandler(uint8_t session ){
+/* This function will be implemented in ECUReset service */
+uint8_t  DiagSetResetHandlerAddr(uint8_t __layer ){
     void (*reset_handler)(void) = ((void*)0);
     volatile uint32_t RESET_HANDLER_ADDR;
-    #if IS_FOR_APP
-        if(session == DEFAULT_SESSION){
-            RESET_HANDLER_ADDR = APP_RESET_HANDLER;
-        }else {
-            RESET_HANDLER_ADDR = BM_RESET_HANDLER;
-        }
-        reset_handler =*(void(*)(void))((volatile uint32_t*)RESET_HANDLER_ADDR);
-    #elif IS_FOR_FBL
-        reset_handler =*(void(*)(void))((volatile uint32_t*)FBL_RESET_HANDLER);
-    #endif 
-    if(reset_handler !=  ((void*)0)){
-    reset_handler();
+    if(__layer == IS_FOR_APP ){
+        RESET_HANDLER_ADDR = APP_RESET_HANDLER_ADDR;
+    }else if(__layer == IS_FOR_FBL){
+        RESET_HANDLER_ADDR = FBL_RESET_HANDLER_ADDR;
+    }else{
+        RESET_HANDLER_ADDR = BM_RESET_HANDLER_ADDR;
     }
-    return CHECK_NOK    
+    reset_handler =*(void(*)(void))((volatile uint32_t*)RESET_HANDLER_ADDR);
+    if(reset_handler != ((void*)0) ) {
+         DiagSetResetHandAdrr(RESET_HANDLER_ADDR);
+    }else{
+        return CHECK_NOK;
+    }
+    return CHECK_OK    
 }
 
 

@@ -32,4 +32,8 @@ volatile uint8_t FblDiagSession ;
 #define DiagSetStateSession(state)               (FblDiagSession = state)
 #define DiagGetCurrentStateSession                FblDiagSession
 
+/* Response Flag Handling       */
+#define DiagSetNoResponse()             (diagResponseFlag |= DiagPutNoResponse)
+#define DiagSetPositiveResponse()       (diagResponseFlag |= DiagPutNoResponse)
+
 #endif
