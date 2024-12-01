@@ -114,7 +114,7 @@ uint8_t  DiagSetResetHandlerAddr(uint8_t __layer ){
     }
     reset_handler =*(void(*)(void))((volatile uint32_t*)RESET_HANDLER_ADDR);
     if(reset_handler != ((void*)0) ) {
-         DiagSetResetHandAdrr(RESET_HANDLER_ADDR);
+        DiagSetResetHandAdrr(RESET_HANDLER_ADDR);
     }else{
         return CHECK_NOK;
     }

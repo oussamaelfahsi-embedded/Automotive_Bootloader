@@ -2,7 +2,6 @@
 
 
 void Diag_EcuSoftReset(void) {
-    /* Disable tester present timeout monitoring */
     DiagSetNoResponse();
     FblDiagDeinit();
     DiagConfigSetMSP();
@@ -13,6 +12,8 @@ void DiagDeinit(){
      /* Destroye allocated section in RAM : Memory Buffer */
     Memory_Deinit();
     DiagResetServiceFlags();
+    /* Disable The Timer */
+    HAL_TIM_Base_Stop(&htim17);
 }
 
 void DiagResetServiceFlags(){

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-
+TIM_HandleTypeDef htim17;
 /* FblDiagSession : is like the ECU State 
 *  FblDiagSession = FblDiagProgrammingSession in case of a Prog request
 */

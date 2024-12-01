@@ -15,10 +15,10 @@ volatile uint8_t DiagResetFlag;
 #define ResetStateReadyToRun     0x01
 #define ResetStateInProgress     0x02
 
-#define DiagSetResetNone()        (DiagResetFlag=ResetStateNone;)
-#define DiagSetResetReady()       (DiagResetFlag=ResetStateReadyToRun;)
-#define DiagSetResetInProgress() (DiagResetFlag=ResetStateInProgress;) 
-#define DiagGetResetReady()       (DiagResetFlag==ResetStateReadyToRun;)
+#define DiagSetResetNone()        (DiagResetFlag=ResetStateNone)
+#define DiagSetResetReady()       (DiagResetFlag=ResetStateReadyToRun)
+#define DiagSetResetInProgress() (DiagResetFlag=ResetStateInProgress) 
+#define DiagGetResetReady()       (DiagResetFlag==ResetStateReadyToRun)
 /* Negative responses Codes NRC         */
 #define SFNS    0x12  /* Sub-function Not Supported                */
 #define IMLOIF  0x13  /* Incorrect Message Length Or Invalid Format*/
@@ -36,8 +36,8 @@ volatile uint8_t DiagResetFlag;
 #define DiagClrError()                      ( diagErrorCode = DiagErrorNone )
 #define FblDiagClrServiceInProgress()       ( diagServiceInProgress=DiagServiceStopped)
 #define DiagConfigSetMSP()                        (__set_MSP(ECUReset_Config[0]);)
-#define DiagGetResetHandler()               (*(void(*)(void))((volatile uint32_t*)ECUReset_Config[1]);)
-#define __SoftReset()                       (Diag_EcuSoftReset();)
+#define DiagGetResetHandler()               (*(void(*)(void))((volatile uint32_t*)ECUReset_Config[1]))
+#define __SoftReset()                       (Diag_EcuSoftReset())
 
 /* Function prototype   */
 
