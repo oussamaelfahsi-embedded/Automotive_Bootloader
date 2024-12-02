@@ -28,10 +28,10 @@ uint8_t *RxData ;
 #define IMLOIF  0x13 /* incorrect Message Length Or Invalid Format --------------------*/
 #define CNC     0x22 /* Conditions Not Correct ----------------------------------------*/
 
-#define SessionCnrtl_ReadData()    { RxData = UDS_GetRxFrame; }
+#define SessionCnrtl_ReadData()    { RxData = UDS_GetRxFrame(); }
 
-#define Diag_SessControl_GetSID             RxData[0]
-#define Diag_SessControl_GetNextSession     RxData[1]
+#define Diag_SessControl_GetSID()             RxData[0]
+#define Diag_SessControl_GetNextSession()     RxData[1]
 #define SESSCRT_POSITIVE_RESPONSE_SID       0x50
 
             

@@ -9,16 +9,16 @@ void DiagSessCntrl_MainFct( void ){
     uint8_t Resp = CHECK_NOK; 
     SessionCnrtl_ReadData();
     /* Verifing the Sub Fnct */
-    if(  DiagCheckSubFunctionCode( Diag_SessControl_GetNextSession ) != CHECK_OK ){
+    if(  DiagCheckSubFunctionCode( Diag_SessControl_GetNextSession() ) != CHECK_OK ){
         SendDiagNegativeResponce(SFNS);
     }
     if( GetDaigSessionFlag() == CHECK_NOK ){
         SendDiagNegativeResponce(CNC);
     }
-    if(DiagGetCurrentStateSession == Diag_SessControl_GetNextSession  ){
-        Resp = DiagSessionReInit( Diag_SessControl_GetNextSession);
+    if(DiagGetCurrentStateSession == Diag_SessControl_GetNextSession()  ){
+        Resp = DiagSessionReInit( Diag_SessControl_GetNextSession());
     }else {
-        Resp = DiagSessionSwitch(Diag_SessControl_GetNextSession);
+        Resp = DiagSessionSwitch(Diag_SessControl_GetNextSession());
     }
     if(Resp !=CHECK_OK){
         SendDiagNegativeResponce( CNC);
@@ -37,13 +37,13 @@ uint8_t DiagCheckSubFunctionCode( uint8_t Sub_Fct_Code ){
 void SendDiagNegativeResponce(  uint8_t NRC  ){
     uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     UDS_Frame[0] = NEGATIVE_RESPONSE_SID;
-    UDS_Frame[1] = Diag_SessControl_GetSID;
+    UDS_Frame[1] = Diag_SessControl_GetSID();
     UDS_Frame[2] = NRC;
     UDS_SetTxFrame(UDS_Frame);
     Diag_Send_Responce();
 }
 
-uint8_t SendDiagPositiveResponce(  uint8_t Sub_Fct  ){
+void SendDiagPositiveResponce(  uint8_t Sub_Fct  ){
     uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     UDS_Frame[0] = SESSCRT_POSITIVE_RESPONSE_SID;
     UDS_Frame[1] = Sub_Fct;
@@ -68,6 +68,7 @@ uint8_t DiagSessionReInit(uint8_t __state){
         DiagSetResetReady();
         if(DiagGetResetReady()){
         DiagSetResetNone();
+        SendDiagPositiveResponce(Diag_SessControl_GetNextSession());
         __SoftReset();
         }
     }
@@ -94,7 +95,7 @@ uint8_t DiagSessionSwitch(uint8_t __state ){
     if(_check == CHECK_OK){
         DiagSetResetReady();
         if(DiagGetResetReady()){
-        DiagSetResetNone();
+        SendDiagPositiveResponce(Diag_SessControl_GetNextSession());
         __SoftReset();
         }
     }
