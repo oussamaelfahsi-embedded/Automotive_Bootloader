@@ -1,6 +1,16 @@
 #include <stdint.h>
 
 
+/* Security Access */
+volatile uint8_t SecurityAccessState;
+#define SECURITYACCESS_VALID         0x00u
+#define SECURITYACCESS_DENIED        0x01u  
+
+#define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
+
+#define GET_SECURITYACCESS_VALID()    (SecurityAccessState&SECURITYACCESS_VALID)   
+
+
 #define FblBmNoOfMagicBytes         8 
 /* Diagnostic Response States            */
 #define DiagErrorNone               0x00
@@ -29,3 +39,17 @@ volatile uint8_t          diagServiceInProgress;
 /** Flag indicating the state of positive response */
 volatile uint8_t          diagResponseFlag;
 
+
+/* DIDs   */
+
+uint32_t  APPLICATION_VER  ;
+uint32_t  BOOTLODAER_VER   ;
+uint8_t   VIN_NUMBER[32]       ;
+uint32_t  ACTIVE_SESSION   ;
+uint32_t  HW_VERSION       ;
+
+#define SET_APPLICATION_VER(__newValue)    (APPLICATION_VER=__newValue)   // Application version
+#define SET_BOOTLODAER_VER(__newValue)     (BOOTLODAER_VER=__newValue)    // Bootloader version
+#define SET_VIN_NUMBER(__newValue)         (VIN_NUMBER=__newValue)        // VIN Number
+#define SET_ACTIVE_SESSION(__newValue)     (ACTIVE_SESSION=__newValue)    // Active Session
+#define SET_HW_VERSION(__newValue)         (HW_VERSION=__newValue)        //Hardware Version    
