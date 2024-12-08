@@ -20,7 +20,9 @@ static uint8_t *RxData ;
 #define GET_SIZE_BL_VER()    GET_SIZE_VAR(uint32_t)   
 #define GET_SIZE_VIN_NUM()   GET_SIZE_VAR(uint8_t)   
 #define GET_SIZE_ACTIVE_SESS()   GET_SIZE_VAR(uint32_t)   
-#define GET_SIZE_HW_VER()   GET_SIZE_VAR(uint32_t)   
+#define GET_SIZE_HW_VER()   GET_SIZE_VAR(uint32_t) 
+
+#define GET_SIZE_TABLE_VIN_NUM()    GET_SIZE_VIN_NUM(VIN_NUMBER)
 
 /* Table store address of variable readable by the client */
 uint32_t* DataToRead[NUMBER_OF_DATA] = {

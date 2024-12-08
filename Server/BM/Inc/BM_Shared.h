@@ -42,11 +42,24 @@ volatile uint8_t          diagResponseFlag;
 
 /* DIDs   */
 
+typedef struct {
+    uint8_t size ;
+    uint8_t table;
+    uint8_t secure;
+}DIDs_Info;
+
 uint32_t  APPLICATION_VER  ;
 uint32_t  BOOTLODAER_VER   ;
-uint8_t   VIN_NUMBER[32]       ;
+uint8_t   VIN_NUMBER[32]   ;
 uint32_t  ACTIVE_SESSION   ;
 uint32_t  HW_VERSION       ;
+
+DIDs_Info Str_Application_ver;
+DIDs_Info Str_Bootloader_ver;
+DIDs_Info Str_Vin_number;
+DIDs_Info Str_Active_session;
+DIDs_Info Str_Hw_version;
+
 
 #define SET_APPLICATION_VER(__newValue)    (APPLICATION_VER=__newValue)   // Application version
 #define SET_BOOTLODAER_VER(__newValue)     (BOOTLODAER_VER=__newValue)    // Bootloader version
