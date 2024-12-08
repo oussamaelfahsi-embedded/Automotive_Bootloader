@@ -18,7 +18,7 @@ static uint8_t *RxData ;
 #define GET_SIZE_VAR(__var)   (sizeof(__var))   
 #define GET_SIZE_APPL_VER()  GET_SIZE_VAR( uint32_t )    
 #define GET_SIZE_BL_VER()    GET_SIZE_VAR(uint32_t)   
-#define GET_SIZE_VIN_NUM()   GET_SIZE_VAR(uint32_t)   
+#define GET_SIZE_VIN_NUM()   GET_SIZE_VAR(uint8_t)   
 #define GET_SIZE_ACTIVE_SESS()   GET_SIZE_VAR(uint32_t)   
 #define GET_SIZE_HW_VER()   GET_SIZE_VAR(uint32_t)   
 

@@ -102,10 +102,11 @@ void SendDiagPositiveResponce(  uint16_t DID , uint32_t* Value  ){
     UDS_Frame[1] = (DID>>8) & 0xFF;// DID MSB 
     UDS_Frame[2] =  DID & 0xFF;      // DID LSB 
 
-    UDS_Frame[3] =  (Value>>24) & 0xFF;  // Value MSB 
-    UDS_Frame[4] =  (Value>>16) & 0xFF;
-    UDS_Frame[5] =  (Value>>8) & 0xFF;
-    UDS_Frame[6] =  (Value) & 0xFF;    // Value LSB
+    UDS_Frame[3] = Value[4];  // Value MSB 
+    UDS_Frame[4] = Value[3];
+    UDS_Frame[5] = Value[2];
+    UDS_Frame[6] = Value[1];    
+    UDS_Frame[7] = Value[0];    // Value LSB
     UDS_SetTxFrame(UDS_Frame);
     Diag_Send_Responce();
 }
