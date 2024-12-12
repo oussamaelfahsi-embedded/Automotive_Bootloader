@@ -2,6 +2,7 @@
 #include <string.h>
 
 uint8_t ReadDataByID_Main(){
+
     uint16_t tmp_id = GET_DATA_ID();
     uint8_t tmp_var.size;
     uint8_t tmp_var.table;
@@ -42,7 +43,6 @@ uint8_t ReadDataByID_Main(){
         /* if the variable is a table */
         if((tmp_var.size*tmp_var.table) > 5  ){
             /* Send a negative response to indicate that the Response Too Long */
-            SendDiagNegativeResponce( RTL );
             uint8_t pData[tmp_var.size * tmp_var.table];
             memcpy(pData , fromData  , tmp_var.size*tmp_var.table);
             TraitAndSendData( tmp_id,  pData ,  tmp_var.size*tmp_var.table);
@@ -54,7 +54,7 @@ uint8_t ReadDataByID_Main(){
     }
     return 0;
 }
-
+/* Used in case we have Too long Data */
 void TraitAndSendData( uint16_t DID,  uint8_t* pData , uint8_t size){
     uint8_t UDS_Data[5] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     uint8_t offset = 0;
@@ -74,9 +74,8 @@ void TraitAndSendData( uint16_t DID,  uint8_t* pData , uint8_t size){
         SendDiagPositiveResponce( DID , UDS_Data  );
     }
 
-
 }
-
+/* Used to initiate the Struct of trait Data*/
 DIDs_Info Init_Dids(uint8_t DID){
         DIDs_Info tmp;
         switch( DID ){
@@ -115,7 +114,6 @@ DIDs_Info Init_Dids(uint8_t DID){
             Str_Hw_version.secure = 0;
             tmp = Str_Hw_version;
             break; 
-        
     }
     return tmp;
 }
