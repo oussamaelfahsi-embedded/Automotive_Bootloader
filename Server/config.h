@@ -27,4 +27,18 @@
 #define IS_FOR_FBL         0x00
 
 
+/* Memory Organization */
+typedef struct{
+    uint8_t sector_size; /* sector size in KBytes */
+    uint16_t bank_size;  /*Size of each bank */
+    uint32_t Flash_start_addr;
+    uint32_t num_banks;   /* Number of banks */
+
+} MemoryOrganization;
+
+MemoryOrganization MCU_FLASH;
+
+
+
+
 #endif

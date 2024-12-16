@@ -8,7 +8,7 @@ volatile uint8_t SecurityAccessState;
 
 #define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
 
-#define GET_SECURITYACCESS_VALID()    (SecurityAccessState&SECURITYACCESS_VALID)   
+#define GET_SECURITYACCESS_VALID()    (SecurityAccessState|SECURITYACCESS_VALID)   
 
 
 #define FblBmNoOfMagicBytes         8 
