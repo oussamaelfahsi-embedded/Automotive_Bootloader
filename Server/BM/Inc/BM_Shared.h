@@ -1,10 +1,7 @@
 #include <stdint.h>
 
 
-/* Security Access */
-volatile uint8_t SecurityAccessState;
-#define SECURITYACCESS_VALID         0x00u
-#define SECURITYACCESS_DENIED        0x01u  
+
 
 #define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
 
