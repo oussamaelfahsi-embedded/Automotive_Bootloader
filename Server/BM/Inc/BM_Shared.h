@@ -1,11 +1,7 @@
+#ifndef BM_SHARED_H
+#define BM_SHARED_H
+
 #include <stdint.h>
-
-
-
-
-#define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
-
-#define GET_SECURITYACCESS_VALID()    (SecurityAccessState|SECURITYACCESS_VALID)   
 
 
 #define FblBmNoOfMagicBytes         8 
@@ -63,3 +59,6 @@ DIDs_Info Str_Hw_version;
 #define SET_VIN_NUMBER(__newValue)         (VIN_NUMBER=__newValue)        // VIN Number
 #define SET_ACTIVE_SESSION(__newValue)     (ACTIVE_SESSION=__newValue)    // Active Session
 #define SET_HW_VERSION(__newValue)         (HW_VERSION=__newValue)        //Hardware Version    
+
+
+#endif

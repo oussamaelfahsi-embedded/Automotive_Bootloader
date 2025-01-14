@@ -1,6 +1,6 @@
 #ifndef SECURITYACCES_H
 #define SECURITYACCES_H
-
+#include "BM_shared.h"
 /*
 
 Security Access service : 0x27
@@ -41,21 +41,24 @@ Step 04: Server to client : send flag (Valid or not )
 ------------------------------------------------------------------------------------------------------------
 For this Version we will consider that we have just one security level.
 */
+
+
 static uint8_t *RxData ;
+volatile uint8_t SecurityAccessState;
+
 
 /* Positive Responce ID                                */
 #define SA_POS_RS_ID                 0x67u
 /* Security Access Flag                                */
-volatile uint8_t SecurityAccessState;
-#define SECURITYACCESS_VALID         0x00u
-#define SECURITYACCESS_DENIED        0x01u  
+#define SECURITYACCESS_VALID         0xFFu
+#define SECURITYACCESS_DENIED        0x00u  
 
-/* The Seed Requested                                   */
-uint8_t seedKey[2];
+//
+#define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
+#define GET_SECURITYACCESS_VALID()    (SecurityAccessState&SECURITYACCESS_VALID)   
 
-/* The Key Calculated by the ECU                        */
-uint8_t Key_clc[6];
-
+uint8_t seedKey[2]; // The Seed Requested
+uint8_t Key_clc[6]; // The Key Calculated by the ECU 
 
 /* Sub-Fonctions                                        */
 #define RequetSeed                0x01u

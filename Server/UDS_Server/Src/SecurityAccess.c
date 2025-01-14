@@ -39,8 +39,10 @@ void SecurityAccess_Main(){
         }
         if(keysFlag == 0x00u){
             /* Invalid Key          */
+            SET_SECURITYACCESS_STATE( SECURITYACCESS_DENIED ); // ECU Locked 
             SendDiagNegativeResponce(IK);
         }else{
+            SET_SECURITYACCESS_STATE( SECURITYACCESS_VALID ); //  ECUUnlocked
             SendDiagPositiveResponce(NULL);
         }
 
