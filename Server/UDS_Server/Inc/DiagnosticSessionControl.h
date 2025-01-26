@@ -14,33 +14,29 @@
 #ifndef  __DIAGNOSTICSESSIONCONTROL_H
 #define  __DIAGNOSTICSESSIONCONTROL_H
 
-#include <stdint.h>
 #include "fbl_diag_core.h"
 #include "UDS_Shared.h"
-#include "fbl_diag_core.h"
 #include "ECU_Reset.h"
 
-uint8_t *RxData ;
- 
+// a tmp  variable used to point to the Received Data so we can copy it to local variable during Traet it 
+extern unsigned char *RxData ;
 
 /* Negative responses Codes NRC */
 #define SFNS    0x12 /* Sub-function Not Supported ------------------------------------*/
 #define IMLOIF  0x13 /* incorrect Message Length Or Invalid Format --------------------*/
 #define CNC     0x22 /* Conditions Not Correct ----------------------------------------*/
 
-#define SessionCnrtl_ReadData()    { RxData = UDS_GetRxFrame(); }
 
-#define Diag_SessControl_GetSID()             RxData[0]
-#define Diag_SessControl_GetNextSession()     RxData[1]
-#define SESSCRT_POSITIVE_RESPONSE_SID       0x50
+
+#define Diag_SessControl_GetNextSession()     tmpReceivedData[1]
 
             
 /* Functions Prototype  -------------------- ------------------------------------------*/
 void DiagSessCntrl_MainFct( void );
+void SessionCnrtl_Init();
 uint8_t DiagCheckSubFunctionCode(uint8_t);
-void SendDiagNegativeResponce(uint8_t);
-uint8_t SendDiagPositiveResponce(uint8_t);
 uint8_t DiagSessionReInit(uint8_t);
 uint8_t DiagSessionSwitch(uint8_t);
+uint8_t  DiagSetResetHandlerAddr(uint8_t __layer );
 
 #endif 

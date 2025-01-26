@@ -1,13 +1,16 @@
 #ifndef FBL_DIAG_CORE
 #define FBL_DIAG_CORE
 
-#include <stdint.h>
 
-TIM_HandleTypeDef htim17;
+// The common checking macros 
+#define UDS_OK             0x00u
+#define UDS_NOK            0x01u
+
+
 /* FblDiagSession : is like the ECU State 
 *  FblDiagSession = FblDiagProgrammingSession in case of a Prog request
 */
-volatile uint8_t FblDiagSession ;
+volatile unsigned char FblDiagSession ;
 /* Bootloader States */
 #define FblDiagStateDefaultSession     0U
 #define FblDiagProgrammingSession      1U
@@ -35,5 +38,12 @@ volatile uint8_t FblDiagSession ;
 /* Response Flag Handling       */
 #define DiagSetNoResponse()             (diagResponseFlag |= DiagPutNoResponse)
 #define DiagSetPositiveResponse()       (diagResponseFlag |= DiagPutNoResponse)
+
+// Common Macro functions used to perform commun treatement
+#define CopyDataBetwenTwoTables(RV_stored , PV_From )        \
+        for(int i = 0 ; i < UDS_FrameLength ; i++ ){ \
+            RV_stored[i] = PV_From[i]; }\
+
+
 
 #endif

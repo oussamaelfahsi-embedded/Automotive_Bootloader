@@ -139,7 +139,9 @@ void SendDiagNegativeResponce(  uint8_t NRC  ){
     Diag_Send_Responce();
 }
 
-
+unsigned char SecurityAccess_Denied(){
+    return !(SecurityAccessState&SECURITYACCESS_VALID);
+}
 
 
 

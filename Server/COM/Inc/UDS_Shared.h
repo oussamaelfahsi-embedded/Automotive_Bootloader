@@ -6,8 +6,9 @@
 
 #define UDS_FrameLength       8
 
-volatile uint8_t   UDS_Rx_Frame[UDS_FrameLength];
-volatile uint8_t UDS_Tx_Frame[UDS_FrameLength];
+extern volatile unsigned char    UDS_Rx_Frame[UDS_FrameLength]; // To store the Received Frame on the communication line 
+extern volatile unsigned char    UDS_Tx_Frame[UDS_FrameLength]; // To store the Data to be send on the com line
+extern unsigned char CurrentServiceID;    // used to store the current service ID                 
 /* UDS Data Handlers    */
 
 #define UDS_GetRxFrame()    UDS_Rx_Frame
@@ -18,5 +19,14 @@ volatile uint8_t UDS_Tx_Frame[UDS_FrameLength];
 
 #define Diag_Send_Responce()      Com_Transmit(  UDS_Tx_Frame )   
 
+
+// Runnables : 
+unsigned char* Intr_Read_ReceivedData_UDS_Rx_Frame(  );
+void Intr_WriteTxData_UDS_Tx_Frame(unsigned char TxData[]);
+void Intr_SendData();
+void SetCurrentServiceID(unsigned cher CurrSrvID);
+unsigned char GetCurrentServiceID(void);
+void SendDiagNegativeResponce(  unsigned char NRC);
+void SendDiagPositiveResponce(unsigned char [] );
 
 #endif

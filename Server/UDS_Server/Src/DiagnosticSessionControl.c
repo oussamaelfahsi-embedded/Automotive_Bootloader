@@ -3,16 +3,18 @@
 #include "com.h"
 #include "config.h"
 
+unsigned char *RxData ;
+static unsigned char tmpReceivedData[8];
 
 void DiagSessCntrl_MainFct( void ){
 
-    uint8_t Resp = CHECK_NOK; 
-    SessionCnrtl_ReadData();
+    unsigned char Resp = UDS_NOK; 
+    SessionCnrtl_Init();
     /* Verifing the Sub Fnct */
-    if(  DiagCheckSubFunctionCode( Diag_SessControl_GetNextSession() ) != CHECK_OK ){
-        SendDiagNegativeResponce(SFNS);
+    if(  DiagCheckSubFunctionCode( Diag_SessControl_GetNextSession() ) != UDS_OK ){
+        SendDiagNegativeResponce(SFNS); //  Defined in UDS_Shared File
     }
-    if( GetDaigSessionFlag() == CHECK_NOK ){
+    if( GetDaigSessionFlag() == UDS_NOK ){
         SendDiagNegativeResponce(CNC);
     }
     if(DiagGetCurrentStateSession == Diag_SessControl_GetNextSession()  ){
@@ -20,71 +22,63 @@ void DiagSessCntrl_MainFct( void ){
     }else {
         Resp = DiagSessionSwitch(Diag_SessControl_GetNextSession());
     }
-    if(Resp !=CHECK_OK){
+    if(Resp !=UDS_OK){
         SendDiagNegativeResponce( CNC);
     }
     /**/
     return Resp;
 }
 
-uint8_t DiagCheckSubFunctionCode( uint8_t Sub_Fct_Code ){
+// 
+void SessionCnrtl_Init(){
+    RxData = Intr_Read_ReceivedData_UDS_Rx_Frame();     //  Read Received Data 
+    CopyDataBetwenTwoTables(tmpReceivedData , RxData ); //  Copy the Received Data into a Local Variable 
+    SetCurrentServiceID(tmpReceivedData[0]);            //  Set the Current Service ID to the var CurrentServiceID
+}
+
+unsigned char DiagCheckSubFunctionCode( unsigned char Sub_Fct_Code ){
     if(Sub_Fct_Code > FblDiagExtendedSession || Sub_Fct_Code < FblDiagStateDefaultSession ){
-        return CHECK_NOK;
+        return UDS_NOK;
     }
-    return CHECK_OK ;
-}
-
-void SendDiagNegativeResponce(  uint8_t NRC  ){
-    uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    UDS_Frame[0] = NEGATIVE_RESPONSE_SID;
-    UDS_Frame[1] = Diag_SessControl_GetSID();
-    UDS_Frame[2] = NRC;
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
-}
-
-void SendDiagPositiveResponce(  uint8_t Sub_Fct  ){
-    uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    UDS_Frame[0] = SESSCRT_POSITIVE_RESPONSE_SID;
-    UDS_Frame[1] = Sub_Fct;
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
+    return UDS_OK ;
 }
 
 
-uint8_t DiagSessionReInit(uint8_t __state){ 
-    uint32_t MSP_Value;
-    uint8_t _check=CHECK_NOK;
+unsigned char DiagSessionReInit(unsigned char __state){ 
+    unsigned int MSP_Value;
+    unsigned char _check=UDS_NOK;
     #if IS_FOR_APP
-    MSP_Value = *((volatile uint32_t*)APP_MSP);
+    MSP_Value = *((volatile unsigned int*)APP_MSP);
     _check=DiagSetResetHandlerAddr(IS_FOR_APP );
     #elif IS_FOR_FBL 
-    MSP_Value = *((volatile uint32_t*)FBL_MSP);
+    MSP_Value = *((volatile unsigned int*)FBL_MSP);
     _check=DiagSetResetHandlerAddr(IS_FOR_FBL );
     #endif 
     DiagSetMSPValue(MSP_Value);
     DiagSetStateSession(__state);
-    if(_check == CHECK_OK){
+    if(_check == UDS_OK){
         DiagSetResetReady();
         if(DiagGetResetReady()){
         DiagSetResetNone();
-        SendDiagPositiveResponce(Diag_SessControl_GetNextSession());
+        // The UDS Frame to Send as a responce 
+        unsigned char tmp_UDSFrame[8]={0x50u, Diag_SessControl_GetNextSession(),0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+        SendDiagPositiveResponce(tmp_UDSFrame);
         __SoftReset();
         }
     }
-    return CHECK_OK;
+    return UDS_OK;
 }
 
 
-uint8_t DiagSessionSwitch(uint8_t __state ){
+unsigned char DiagSessionSwitch(unsigned char __state ){
     DiagSetResetInProgress();
-    uint8_t _check = CHECK_NOK ;
-    uint32_t MSP_Value;  
+    unsigned char _check = UDS_NOK ;
+    unsigned int  MSP_Value;  
     #if IS_FOR_APP 
-        MSP_Value = *((volatile uint32_t*)BM_MSP);
+        MSP_Value = *((volatile unsigned int*)BM_MSP);
         _check=DiagSetResetHandlerAddr(IS_FOR_BM );
     #elif IS_FOR_FBL
-        MSP_Value = *((volatile uint32_t*)FBL_MSP);
+        MSP_Value = *((volatile unsigned int*)FBL_MSP);
         _check=DiagSetResetHandlerAddr(IS_FOR_FBL );
     #endif 
     /* Set the MSP VALUE */
@@ -92,10 +86,12 @@ uint8_t DiagSessionSwitch(uint8_t __state ){
 
     /* Set the FLAG in the new session control */
     DiagSetStateSession(__state);
-    if(_check == CHECK_OK){
+    if(_check == UDS_OK){
         DiagSetResetReady();
         if(DiagGetResetReady()){
-        SendDiagPositiveResponce(Diag_SessControl_GetNextSession());
+        // The UDS Frame to Send as a responce 
+        unsigned char tmp_UDSFrame[8]={0x50u, Diag_SessControl_GetNextSession(),0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+        SendDiagPositiveResponce(tmp_UDSFrame);
         __SoftReset();
         }
     }
@@ -103,9 +99,9 @@ uint8_t DiagSessionSwitch(uint8_t __state ){
 }
 
 /* This function will be implemented in ECUReset service */
-uint8_t  DiagSetResetHandlerAddr(uint8_t __layer ){
+unsigned char  DiagSetResetHandlerAddr(unsigned char __layer ){
     void (*reset_handler)(void) = ((void*)0);
-    volatile uint32_t RESET_HANDLER_ADDR;
+    volatile unsigned int RESET_HANDLER_ADDR;
     if(__layer == IS_FOR_APP ){
         RESET_HANDLER_ADDR = APP_RESET_HANDLER_ADDR;
     }else if(__layer == IS_FOR_FBL){
@@ -113,13 +109,13 @@ uint8_t  DiagSetResetHandlerAddr(uint8_t __layer ){
     }else{
         RESET_HANDLER_ADDR = BM_RESET_HANDLER_ADDR;
     }
-    reset_handler =*(void(*)(void))((volatile uint32_t*)RESET_HANDLER_ADDR);
+    reset_handler =*(void(*)(void))((volatile unsigned int*)RESET_HANDLER_ADDR);
     if(reset_handler != ((void*)0) ) {
         DiagSetResetHandAdrr(RESET_HANDLER_ADDR);
     }else{
-        return CHECK_NOK;
+        return UDS_NOK;
     }
-    return CHECK_OK    
+    return UDS_OK;    
 }
 
 

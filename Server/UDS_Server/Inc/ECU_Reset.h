@@ -1,13 +1,11 @@
 #ifndef  __ECU_RESET_H
 #define  __ECU_RESET_H
 
-#include <stdint.h>
 #include "fbl_diag_core.h"
 #include "UDS_Shared.h"
-#include "fbl_diag_core.h"
 
-static uint8_t *RxData ;
-volatile uint8_t DiagResetFlag;
+static unsigned char *RxData ;
+extern volatile unsigned char DiagResetFlag;
 
 
 /*        */
@@ -18,13 +16,13 @@ volatile uint8_t DiagResetFlag;
 #define ECUReset_POSITIVE_RESPONSE_SID      (0x51u)
 
 /* Reset Types           */
-#define HardReset      0x01
-#define SoftReset      0x02
+#define HardReset      0x01u
+#define SoftReset      0x02u
 
 /* Reset State Handler    */
-#define ResetStateNone           0x00
-#define ResetStateReadyToRun     0x01
-#define ResetStateInProgress     0x02
+#define ResetStateNone           0x00u
+#define ResetStateReadyToRun     0x01u
+#define ResetStateInProgress     0x02u
 
 #define DiagSetResetNone()        (DiagResetFlag=ResetStateNone)
 #define DiagSetResetReady()       (DiagResetFlag=ResetStateReadyToRun)
@@ -32,18 +30,31 @@ volatile uint8_t DiagResetFlag;
 #define DiagGetResetReady()       (DiagResetFlag==ResetStateReadyToRun)
 
 /* Negative responses Codes NRC         */
-#define SFNS    0x12  /* Sub-function Not Supported                */
-#define IMLOIF  0x13  /* Incorrect Message Length Or Invalid Format*/
-#define CNC     0x22  /* Conditions Not Correct                    */
-#define SAD     0x33  /*Security Acess Denied                      */
+#define SFNS    0x12u  /* Sub-function Not Supported                */
+#define IMLOIF  0x13u  /* Incorrect Message Length Or Invalid Format*/
+#define CNC     0x22u  /* Conditions Not Correct                    */
+#define SAD     0x33u  /*Security Acess Denied                      */
 
 
 #define DiagClrError()                      ( diagErrorCode = DiagErrorNone )
 #define FblDiagClrServiceInProgress()       ( diagServiceInProgress=DiagServiceStopped)
 #define DiagConfigSetMSP()                  (__set_MSP(ECUReset_Config[0]);)
 #define DiagGetResetHandler()               (*(void(*)(void))((volatile uint32_t*)ECUReset_Config[1]))
+
+/*
 #define __SoftReset()                       (Diag_EcuSoftReset())
 #define __HardReset()                       (Diag_EcuHardReset())
+*/
+
 /* Function prototype   */
+unsigned char ECUResetMain(void);
+void ECUReset_Init(void);
+void Diag_EcuHardReset(void);
+void Diag_EcuSoftReset(void);
+void DiagDeinit(void);
+void DiagResetServiceFlags(void);
+void ResetRxMessage(unsigned char* RxMssg[] );
+void __SoftReset(void);
+void __HardReset(void);
 
 #endif

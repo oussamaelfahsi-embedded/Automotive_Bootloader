@@ -55,7 +55,7 @@ volatile uint8_t SecurityAccessState;
 
 //
 #define SET_SECURITYACCESS_STATE(_State)        (SecurityAccessState=_State)
-#define GET_SECURITYACCESS_VALID()    (SecurityAccessState&SECURITYACCESS_VALID)   
+#define GET_SECURITYACCESS_VALID()    (SecurityAccessState & SECURITYACCESS_VALID)   
 
 uint8_t seedKey[2]; // The Seed Requested
 uint8_t Key_clc[6]; // The Key Calculated by the ECU 
@@ -79,6 +79,6 @@ uint8_t Key_clc[6]; // The Key Calculated by the ECU
 #define RTDNE                    0x37u  /* required Time Delay Not Expired            */ 
 
 
-
+unsigned char SecurityAccess_Denied();
 
 #endif

@@ -1,49 +1,58 @@
 #include "ReadDataByID.h"
-#include <string.h>
 
-uint8_t ReadDataByID_Main(){
 
-    uint16_t tmp_id = GET_DATA_ID();
-    uint8_t tmp_var.size;
-    uint8_t tmp_var.table;
+static unsigned char tmpReceivedData[8];
+
+
+unsigned char ReadDataByID_Main(){
+
+    unsigned short tmp_id ; // Used to store the Received Data ID, ID size : 16 bits
+    //unsigned char tmp_var.size;
+    //unsigned char tmp_var.table;
+
     DIDs_Info tmp_var;
-    tmp_var = Init_Dids(tmp_id);
 
-    if( tmp_var.secure == 1  && !GET_SECURITYACCESS_VALID()){
+    ReadDataByID_Init(); // Initializaion 
+    tmp_id = (unsigned short)( (tmpReceivedData[1]<<8)|tmpReceivedData[2] ) ; // set the Data ID in the tmp_id varaible   GET_DATA_ID();
+    tmp_var = Init_Dids(tmp_id); // Initiliaze the info about each did 
+    if( tmp_var.secure == 1  && SecurityAccess_Denied()){
         SendDiagNegativeResponce(SAD);
-        return 1;
+        return UDS_NOK;
     }
 
-    if(tmp_id > NUMBER_OF_DATA ){
-        /*Error */
+    if( is_DID_valid(tmp_id) ){
+        /*Error Data ID is not valid or Unknown*/
         SendDiagNegativeResponce(ROOR);
-        return 1 ;
+        return UDS_NOK;
     }
-    uint8_t UDS_Frame[5] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    unsigned char UDS_Frame[8] = { 0xFFu,0xFFu,0xFFu,0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     if(tmp_var.table == 0 ){
         /* Variable's value is represneted in 4 Bytes  */
-        uint32_t Value ;
+        unsigned int Value ;
         if(tmp_var.size == 1){
-            Value = *((uint8_t*)DataToRead[tmp_id]);
+            Value = *((unsigned char*)DataToRead[tmp_id]);
         }else if(tmp_var.size == 2 ){
             Value = *((uint16_t*)DataToRead[tmp_id]);
         }else{
-            Value = *((uint32_t*)DataToRead[tmp_id]);
+            Value = *((unsigned int*)DataToRead[tmp_id]);
         }
-        UDS_Frame[0] =  (Value>>24) & 0xFF;  // Value MSB 
-        UDS_Frame[1] =  (Value>>16) & 0xFF;
-        UDS_Frame[2] =  (Value>>8) & 0xFF;
-        UDS_Frame[3] =  (Value) & 0xFF;    // Value LSB
-        SendDiagPositiveResponce(tmp_id , UDS_Frame  );
+        UDS_Frame[0] = 0x62u; 
+        UDS_Frame[1] = (tmp_id>>16)&0x00FFu; // ID MSB
+        UDS_Frame[2] = (tmp_id) &0x00FFu;    // ID LSB
+        UDS_Frame[3] =  (Value>>24) & 0xFF;  // Value MSB 
+        UDS_Frame[4] =  (Value>>16) & 0xFF;
+        UDS_Frame[5] =  (Value>>8) & 0xFF;
+        UDS_Frame[6] =  (Value) & 0xFF;    // Value LSB
+        SendDiagPositiveResponce(UDS_Frame);
     }else{
-        uint8_t* fromData = NULL;
+        unsigned char* fromData = NULL;
         if(tmp_id == DID_VIN_NUM ){
-            fromData = ((uint8_t*)DataToRead[DID_VIN_NUM]);
+            fromData = ((unsigned char*)DataToRead[DID_VIN_NUM]);
         }
         /* if the variable is a table */
         if((tmp_var.size*tmp_var.table) > 5  ){
             /* Send a negative response to indicate that the Response Too Long */
-            uint8_t pData[tmp_var.size * tmp_var.table];
+            unsigned char pData[tmp_var.size * tmp_var.table];
             memcpy(pData , fromData  , tmp_var.size*tmp_var.table);
             TraitAndSendData( tmp_id,  pData ,  tmp_var.size*tmp_var.table);
         }else{
@@ -54,29 +63,41 @@ uint8_t ReadDataByID_Main(){
     }
     return 0;
 }
+
+void ReadDataByID_Init(){
+    unsigned char *RxData ;
+    tmpReceivedData = Intr_Read_ReceivedData_UDS_Rx_Frame();     //  Read Received Data 
+    CopyDataBetwenTwoTables(tmpReceivedData , RxData ); //  Copy the Received Data into a Local Variable 
+    SetCurrentServiceID(tmpReceivedData[0]);            //  Set the Current Service ID to the var CurrentServiceID
+}
+
 /* Used in case we have Too long Data */
-void TraitAndSendData( uint16_t DID,  uint8_t* pData , uint8_t size){
-    uint8_t UDS_Data[5] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    uint8_t offset = 0;
+void TraitAndSendData( uint16_t DID,  unsigned char* pData , unsigned char size){
+    //unsigned char UDS_Data[5] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    unsigned char UDS_Frame[8] = {0xFF,0xFF,0xFF,0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    unsigned char offset = 0;
+    UDS_Frame[0] = 0x62u; 
+    UDS_Frame[1] = (DID>>16)&0x00FFu; // ID MSB
+    UDS_Frame[2] = (DID) &0x00FFu;    // ID LSB
     for(int i = 0 ; i < size/5 ; i++){
-        for(int j = 0 ; j < 5 ; j++){
-            UDS_Data[j] = pData[(i*5)+j];
+        for(int j = 3 ; j < 8 ; j++){
+            UDS_Frame[j] = pData[(i*5)+j];
             offset++;
         }
-        SendDiagPositiveResponce( DID , UDS_Data  );
+        SendDiagPositiveResponce(UDS_Frame);
     }
     if(offset != size ){
-        int j = 0 ;
+        int j = 3 ;
         for(int i = offset ; i <size ; i++ ){
-            UDS_Data[j] = pData[i];
+            UDS_Frame[j] = pData[i];
             j++;
         }
-        SendDiagPositiveResponce( DID , UDS_Data  );
+        SendDiagPositiveResponce( UDS_Frame  );
     }
 
 }
 /* Used to initiate the Struct of trait Data*/
-DIDs_Info Init_Dids(uint8_t DID){
+DIDs_Info Init_Dids(unsigned char DID){
         DIDs_Info tmp;
         switch( DID ){
         case DID_APP_VER :
@@ -118,27 +139,10 @@ DIDs_Info Init_Dids(uint8_t DID){
     return tmp;
 }
 
-
-void SendDiagPositiveResponce(  uint16_t DID , uint32_t* Value  ){
-    uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    UDS_Frame[0] = DIDs_POSITIVE_RESPONSE_SID;
-    UDS_Frame[1] = (DID>>8) & 0xFF;// DID MSB 
-    UDS_Frame[2] =  DID & 0xFF;      // DID LSB 
-
-    UDS_Frame[3] = Value[4];  // Value MSB 
-    UDS_Frame[4] = Value[3];
-    UDS_Frame[5] = Value[2];
-    UDS_Frame[6] = Value[1];    
-    UDS_Frame[7] = Value[0];    // Value LSB
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
-}
-
-void SendDiagNegativeResponce(  uint8_t NRC  ){
-    uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    UDS_Frame[0] = 0x7F;
-    UDS_Frame[1] = GET_SID();
-    UDS_Frame[2] = NRC;
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
+// 
+unsigned char is_DID_valid(unsigned short did ){
+    if(did != DID_APP_VER && did != DID_BL_VER && did != DID_VIN_NUM && did != DID_ACTIVE_SESS && did != DID_HW_VER ){
+        return UDS_NOK;
+    }
+    return UDS_OK;
 }

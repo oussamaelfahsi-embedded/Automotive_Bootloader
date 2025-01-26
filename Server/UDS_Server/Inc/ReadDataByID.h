@@ -2,8 +2,9 @@
 #define __READDATABYID_H
 
 #include "BM_Shared.h"
-
-static uint8_t *RxData ;
+#include "SecurityAccess.h"
+#include "fbl_diag_core.h"
+#include "UDS_Shared.h"
 
 #define NUMBER_OF_DATA   5
 #define DIDs_POSITIVE_RESPONSE_SID    0x62u
@@ -35,15 +36,17 @@ uint32_t* DataToRead[NUMBER_OF_DATA] = {
 
 
 
-#define GET_DATA_ID()   ((uint16_t)( (RxData[1]<<8)|RxData[2] ))
-#define GET_SID()       (RxData[0])
-#define GET_SIZE_DATA(__DID)    ( DIDs_Size[__DID] )
-
 /* NRCs */
 #define ROOR        0x31u  // Request out of range 
 #define SAD         0x33u  // Security Access Denied 
 #define CNC         0x22   // Conditions Not Correct 
 #define RTL         0x14   // Response Too Long 
 
+// Functions prototypes : 
+unsigned char ReadDataByID_Main();
+void ReadDataByID_Init();
+void TraitAndSendData( uint16_t DID,  unsigned char* pData , unsigned char size);
+DIDs_Info Init_Dids(unsigned char DID);
+unsigned char is_DID_valid(unsigned short did );
 
 #endif 
