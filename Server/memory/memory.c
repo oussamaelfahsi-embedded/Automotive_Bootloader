@@ -13,7 +13,7 @@ void MEM_init(){
 
 // Check if an addr inside a specific section
 // each section has a start address and a size 
-uint8_t MEM_is_addr_Valid( uint32_t addr , Mem_str section  ){
+uint8_t MEM_addr_is_Valid( uint32_t addr , Mem_str section  ){
     
     MEM_init();
     

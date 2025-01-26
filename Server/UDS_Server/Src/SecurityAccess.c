@@ -39,10 +39,10 @@ void SecurityAccess_Main(){
         }
         if(keysFlag == 0x00u){
             /* Invalid Key          */
-            SET_SECURITYACCESS_STATE( SECURITYACCESS_DENIED ); // ECU Locked 
+            RTE_Write_DataElement_SecurityAccessState(SECURITYACCESS_DENIED );// ECU Locked 
             SendDiagNegativeResponce(IK);
         }else{
-            SET_SECURITYACCESS_STATE( SECURITYACCESS_VALID ); //  ECUUnlocked
+            RTE_Write_DataElement_SecurityAccessState(SECURITYACCESS_VALID );// ECU UnLocked 
             SendDiagPositiveResponce(NULL);
         }
 
@@ -140,7 +140,8 @@ void SendDiagNegativeResponce(  uint8_t NRC  ){
 }
 
 unsigned char SecurityAccess_Denied(){
-    return !(SecurityAccessState&SECURITYACCESS_VALID);
+    unsigned char SA_state = RTE_Read_DataElement_SecurityAccessState();
+    return !(SA_state&SECURITYACCESS_VALID);
 }
 
 

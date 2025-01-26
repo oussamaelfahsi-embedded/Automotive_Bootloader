@@ -1,37 +1,47 @@
 #include "RequestDownload.h"
 
 
+unsigned char tmpReceivedData[8];
+
 
 void RequestDownload_Main(){
 
-    uint8_t checkFlag = 0x00u  ;
-    uin8_t tmp_NRC;
-    uint8_t MemAddrLength;
-    uint8_t MemSizeLength;
-    DownloadStartAddr = (RxData[3]<<24)|(RxData[4]<<16)|(RxData[5]<<8)|RxData[6];
+    unsigned char checkFlag = 0x00u  ;
+    unsigned char tmp_NRC;
+    unsigned char MemAddrLength;
+    unsigned char MemSizeLength;
+
+    void RequestDownload_Init(){
 
     // Data Format id & Address And length FormatId : are Valid 
-    MemAddrLength = RxData[2] && 0x0F;
-    MemSizeLength = RxData[2] && 0xF0;
-    MemSizeLength = MemSizeLength>>4;
-    
-    if( RxData[1] != NoMethodUsed & RxData[1] != EncryptedMethod ){
+    MemAddrLength = tmpReceivedData[2] && 0x0F; // Address length 
+    MemSizeLength = (tmpReceivedData[2] && 0xF0)>>4; // Memory size length
+    {
+    unsigned int tmp_DwdStartAddr = get_memoryStrat_address(MemAddrLength);
+    RTE_Write_DataElement_DownloadStartAddr(tmp_DwdStartAddr);
+    }
+
+    if( tmpReceivedData[1] != NoMethodUsed & tmpReceivedData[1] != EncryptedMethod ){
         checkFlag = 0x01u;
         tmp_NRC = ROOR;
     }else if( MemAddrLength + MemSizeLength > 5  ){
         // Send an error Message  
         checkFlag = 0x01u;
         tmp_NRC = IMLOIF;
-    }else if( !GET_SECURITYACCESS_VALID() ){
+    }else if( SecurityAccess_Denied() ){
         checkFlag = 0x01;
         tmp_NRC = SAD; // Security Access denied 
-    }else if( !(MEM_is_addr_Valid(  DownloadStartAddr  , Application_Section ) | MEM_is_addr_Valid(  DownloadStartAddr  , Calibration_Section )) ){
+    }
+    
+    unsigned char mem_flag = MEM_addr_is_Valid(  RTE_Read_DataElement_DownloadStartAddr()  , Application_Section ) | MEM_addr_is_Valid(  RTE_Read_DataElement_DownloadStartAddr()  , Calibration_Section );
+    if( mem_flag != 0x01u ){
         checkFlag = 0x01u;
         tmp_NRC = ROOR;
     }else{
-        // 0x50 : 5 is the number of Data bytes can the client end each time
-        DownloadMemorySize = RxData[7];
-        uint8_t UDS_Frame[8] = { 0x74, 0x50, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        // 0x50 : 5 is the number of Data bytes can the client send each time
+        unsigned int tmp_DownloadMemorySize = tmpReceivedData[7];
+        RTE_Write_DataElement_DownloadMemorySize(tmp_DownloadMemorySize);
+        unsigned char UDS_Frame[8] = { 0x74, 0x50, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         SendDiagPositiveResponce(UDS_Frame);
     }
 
@@ -42,18 +52,17 @@ void RequestDownload_Main(){
 
 }
 
-void SendDiagPositiveResponce(   uint8_t UDS_Frame[]  ){
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
+void RequestDownload_Init(){
+    static unsigned char *RxData;
+    RxData = Intr_Read_ReceivedData_UDS_Rx_Frame();     //  Read Received Data 
+    CopyDataBetwenTwoTables(tmpReceivedData , RxData ); //  Copy the Received Data into a Local Variable 
+    SetCurrentServiceID(tmpReceivedData[0]);            //  Set the Current Service ID to the var CurrentServiceID
 }
 
-
-
-void SendDiagNegativeResponce(  uint8_t NRC  ){
-    uint8_t UDS_Frame[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    UDS_Frame[0] = 0x7Fu;
-    UDS_Frame[1] = 0x34u;
-    UDS_Frame[2] = NRC;
-    UDS_SetTxFrame(UDS_Frame);
-    Diag_Send_Responce();
+unsigned int get_memoryStrat_address(unsigned char addressLength){
+    unsigned int MemAddr;
+    if(addressLength == 4 ){
+        MemAddr =  (tmpReceivedData[3]<<24)|(tmpReceivedData[4]<<16)|(tmpReceivedData[5]<<8)|tmpReceivedData[6];
+    } 
+    return MemAddr;
 }

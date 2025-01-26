@@ -1,7 +1,7 @@
 #ifndef REQUESTDOWNLOAD_H
 #define REQUESTDOWNLOAD_H
 #include "BM_Shared.h"
-#include "SecurityAccess.h"
+#include "Interfaces_accessing_var.h"
 
 /*
 Service Request Download 0x34 
@@ -29,17 +29,11 @@ Notes :
 */
 
 
-static uint8_t *RxData;
-volatile uint32_t DownloadStartAddr; // store the start address to performing the download 
-volatile uint32_t DownloadMemorySize; 
 
 /*  SubFonction Supported             */
 #define NoMethodUsed                 0x00u  
 #define EncryptedMethod              0x01u
 
-/* Variables used                     */
-uint32_t MemAddress;
-uint32_t MemSize;
 
 /* NRC                               */
 #define IMLOIF                     0x13u
@@ -47,6 +41,11 @@ uint32_t MemSize;
 #define ROOR                       0x31u 
 #define SAD                        0x33u
 #define UDNA                       0x70u // Upload Download Not Accepted 
+
+// Functions prototype ;
+void RequestDownload_Main();
+void RequestDownload_Init(); 
+unsigned int get_memoryStrat_address(unsigned char addressLength);
 
 
 #endif
