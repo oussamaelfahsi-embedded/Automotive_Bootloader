@@ -17,7 +17,7 @@ extern volatile unsigned char DiagResetFlag;
 
 /* Reset Types           */
 #define HardReset      0x01u
-#define SoftReset      0x02u
+#define SoftReset      0x03u
 
 /* Reset State Handler    */
 #define ResetStateNone           0x00u

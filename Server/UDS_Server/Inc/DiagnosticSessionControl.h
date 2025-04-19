@@ -26,9 +26,13 @@ extern unsigned char *RxData ;
 #define IMLOIF  0x13 /* incorrect Message Length Or Invalid Format --------------------*/
 #define CNC     0x22 /* Conditions Not Correct ----------------------------------------*/
 
+// Supported Sessions
+#define DEFAULTSESSION           0x01U
+#define PROGRAMMINGSESSION       0x02U
+#define EXTENDEDSESSION          0x03U
 
 
-#define Diag_SessControl_GetNextSession()     tmpReceivedData[1]
+#define Diag_SessControl_NextSession()     tmpReceivedData[1]
 
             
 /* Functions Prototype  -------------------- ------------------------------------------*/

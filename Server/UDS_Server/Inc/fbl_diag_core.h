@@ -33,7 +33,7 @@ volatile unsigned char FblDiagSession ;
 #define DiagStateIsDefaultSession()              (FblDiagSession == FblDiagStateDefaultSession )
 #define DiagStateIsExtendedSession()             (FblDiagSession == FblDiagExtendedSession )
 #define DiagSetStateSession(state)               (FblDiagSession = state)
-#define DiagGetCurrentStateSession                FblDiagSession
+#define DiagGetCurrentStateSession()                FblDiagSession
 
 /* Response Flag Handling       */
 #define DiagSetNoResponse()             (diagResponseFlag |= DiagPutNoResponse)

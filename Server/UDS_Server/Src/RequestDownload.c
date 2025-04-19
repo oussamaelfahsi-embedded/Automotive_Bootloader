@@ -11,8 +11,7 @@ void RequestDownload_Main(){
     unsigned char MemAddrLength;
     unsigned char MemSizeLength;
 
-    void RequestDownload_Init(){
-
+    RequestDownload_Init();
     // Data Format id & Address And length FormatId : are Valid 
     MemAddrLength = tmpReceivedData[2] && 0x0F; // Address length 
     MemSizeLength = (tmpReceivedData[2] && 0xF0)>>4; // Memory size length
@@ -41,6 +40,7 @@ void RequestDownload_Main(){
         // 0x50 : 5 is the number of Data bytes can the client send each time
         unsigned int tmp_DownloadMemorySize = tmpReceivedData[7];
         RTE_Write_DataElement_DownloadMemorySize(tmp_DownloadMemorySize);
+        RTE_Write_DataElement_SecurityAccessState(DownloadRequested );
         unsigned char UDS_Frame[8] = { 0x74, 0x50, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         SendDiagPositiveResponce(UDS_Frame);
     }
@@ -49,7 +49,7 @@ void RequestDownload_Main(){
         SendDiagNegativeResponce(tmp_NRC);
     }
 
-
+    ClientRequest = RequestDownload;
 }
 
 void RequestDownload_Init(){

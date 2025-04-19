@@ -5,13 +5,16 @@ uint16_t SeedValue;
 uint8_t CostKey[6] = {}; 
 uint8_t Calckey[6]; 
 uint8_t keysFlag = 0x01u;
+
 /*
 Step 1 : request seed 
 Step 2 : Send Key 
  */
 
 
-void SecurityAccess_Main(){
+void SecurityAccess_Main( unsigned char* RxData ){
+
+    SessionCnrtl_Init( RxData);
     /* Check Sub-Fonction           */
     if(RxData[1] !=  SecurityUnlockedSteps ){
         /* Request Sequence Error  */

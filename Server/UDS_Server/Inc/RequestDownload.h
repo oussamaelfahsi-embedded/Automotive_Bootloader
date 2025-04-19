@@ -34,6 +34,8 @@ Notes :
 #define NoMethodUsed                 0x00u  
 #define EncryptedMethod              0x01u
 
+#define DownloadNotRequested        0x00u  
+#define DownloadRequested            0x01u
 
 /* NRC                               */
 #define IMLOIF                     0x13u
@@ -42,7 +44,7 @@ Notes :
 #define SAD                        0x33u
 #define UDNA                       0x70u // Upload Download Not Accepted 
 
-// Functions prototype ;
+// Runnables  ;
 void RequestDownload_Main();
 void RequestDownload_Init(); 
 unsigned int get_memoryStrat_address(unsigned char addressLength);
